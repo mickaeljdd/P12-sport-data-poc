@@ -1,6 +1,7 @@
 import requests
-
-from config import GOOGLE_API_KEY
+import random
+import pandas as pd
+from config import GOOGLE_MAPS_API_KEY
 from config import COMPANY_ADDRESS
 
 
@@ -13,7 +14,7 @@ class GoogleDistanceService:
         params = {
             "origins": origin,
             "destinations": COMPANY_ADDRESS,
-            "key": GOOGLE_API_KEY,
+            "key": GOOGLE_MAPS_API_KEY,
             "units": "metric"
         }
 
@@ -28,3 +29,49 @@ class GoogleDistanceService:
         data = response.json()
 
         return data
+    
+class DistanceService:
+
+    DISTANCE_COLUMN = "Distance domicile-entreprise (km)"
+
+    def __init__(self):
+        random.seed(42)      # Toujours les mêmes résultats
+
+    def generate_distance(self, transport: str) -> float:
+
+        transport = str(transport).strip()
+
+        if transport == "Marche":
+            return round(random.uniform(0.5, 25), 1)
+
+        elif transport in {
+            "Vélo",
+            "Trottinette",
+            "Vélo/Trottinette/Autres",
+        }:
+            return round(random.uniform(2, 35), 1)
+
+        elif transport in {
+            "Voiture",
+            "Véhicule thermique/électrique",
+        }:
+            return round(random.uniform(5, 60), 1)
+
+        elif transport in {
+            "Transport en commun",
+            "Transports en commun",
+        }:
+            return round(random.uniform(5, 40), 1)
+
+        return round(random.uniform(1, 30), 1)
+
+    def compute(self, df: pd.DataFrame):
+
+        df = df.copy()
+
+        df[self.DISTANCE_COLUMN] = (
+            df["Moyen de déplacement"]
+            .apply(self.generate_distance)
+        )
+
+        return df
