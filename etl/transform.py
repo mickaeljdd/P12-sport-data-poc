@@ -34,7 +34,10 @@ def normalize_transport(df):
         "Trottinette": "Trottinette",
 
         "Voiture": "Voiture",
-        "Transport en commun": "Transport en commun"
+        "Transport en commun": "Transport en commun",
+        "Transports en commun": "Transports en commun",
+        "véhicule thermique/électrique": "Véhicule thermique/électrique",
+        "Véhicule thermique/électrique": "Véhicule thermique/électrique",
     }
 
     df["Moyen de déplacement"] = (
