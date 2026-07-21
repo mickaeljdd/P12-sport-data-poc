@@ -1,7 +1,7 @@
-from pipeline_service import Pipeline
+from .pipeline_service import Pipeline
 
 
-def main():
+def main() -> None:
 
     Pipeline().run()
 

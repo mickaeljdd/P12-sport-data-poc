@@ -23,7 +23,8 @@ MIN_ACTIVITIES = 15
 MAX_DISTANCE = {
     "Marche": 15,
     "Vélo": 25,
-    "Trottinette": 25
+    "Trottinette": 25,
+    "Vélo/Trottinette/Autres": 25,
 }
 
 # Modes de déplacement éligibles
@@ -38,9 +39,42 @@ from dotenv import load_dotenv
 import os
 
 load_dotenv()
+from pathlib import Path
 
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+
+ROOT_DIR = Path(__file__).resolve().parent
+DATABASE_DIR = ROOT_DIR / "database"
+DATABASE_PATH = DATABASE_DIR / "sport_poc.db"
+
+DATABASE_URL = f"sqlite:///{DATABASE_PATH.as_posix()}"
+
+GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
 
 COMPANY_ADDRESS = "1362 Avenue des Platanes, 34970 Lattes"
 
-DISTANCE_PROVIDER = "google"
+DISTANCE_PROVIDER = os.getenv(
+    "DISTANCE_PROVIDER",
+    "mock",
+).strip().lower()
+
+GOOGLE_ROUTES_URL = (
+    "https://routes.googleapis.com/"
+    "directions/v2:computeRoutes"
+)
+
+GOOGLE_MAPS_TIMEOUT_SECONDS = 15
+
+DISTANCE_COLUMN = (
+    "Distance domicile-entreprise (km)"
+)
+
+SLACK_WEBHOOK_URL = os.getenv("SLACK_WEBHOOK_URL")
+
+SLACK_TIMEOUT_SECONDS = int(
+    os.getenv(
+        "SLACK_TIMEOUT_SECONDS",
+        "10",
+    )
+)
+MIN_INCREMENTAL_ACTIVITIES = 5
+MAX_INCREMENTAL_ACTIVITIES = 15
