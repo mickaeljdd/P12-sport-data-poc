@@ -83,7 +83,7 @@ Installer les dépendances :
 pip install -r requirements.txt
 ```
 
-Créer un fichier `.env` à partir de `.env_sample.txt` puis renseigner les paramètres nécessaires.
+Créer un fichier `.env` à partir de `.env_sample` puis renseigner les paramètres nécessaires.
 
 Pour utiliser Google Routes API :
 
