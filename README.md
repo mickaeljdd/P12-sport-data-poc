@@ -170,13 +170,6 @@ Créer un Incoming Webhook Slack puis renseigner :
 ```dotenv
 SLACK_WEBHOOK_URL=https://hooks.slack.com/services/...
 ```
----
-## Auteur
-
-Projet réalisé dans le cadre du parcours de formation Data & IA.
-
-<<<<<<< HEAD
----
 
 ## Streaming avec Redpanda
 
@@ -263,6 +256,11 @@ Pour supprimer également les données persistées dans Redpanda :
 ```bash
 docker compose -f docker-compose.redpanda.yml down -v
 ```
-=======
+---
+## Auteur
+
+Mickael DARMON
+
 Projet réalisé dans le cadre du parcours de formation Data & IA.
->>>>>>> 7fa90747e5dabb70273a8c18eddf2aa67f29113f
+
+---
