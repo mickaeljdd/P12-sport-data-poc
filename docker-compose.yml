@@ -1,0 +1,46 @@
+name: sport-data-redpanda
+
+services:
+  redpanda:
+    image: docker.redpanda.com/redpandadata/redpanda:v25.1.9
+    container_name: sport-redpanda
+    command:
+      - redpanda
+      - start
+      - --overprovisioned
+      - --smp=1
+      - --memory=1G
+      - --reserve-memory=0M
+      - --node-id=0
+      - --check=false
+      - --kafka-addr=internal://0.0.0.0:9092,external://0.0.0.0:19092
+      - --advertise-kafka-addr=internal://redpanda:9092,external://localhost:19092
+    ports:
+      - "19092:19092"
+      - "19644:9644"
+    volumes:
+      - redpanda-data:/var/lib/redpanda/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "rpk cluster health -X brokers=localhost:9092 | grep -q 'Healthy:.*true'"
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 20
+      start_period: 20s
+
+  console:
+    image: docker.redpanda.com/redpandadata/console:v3.2.2
+    container_name: sport-redpanda-console
+    depends_on:
+      redpanda:
+        condition: service_healthy
+    environment:
+      KAFKA_BROKERS: redpanda:9092
+    ports:
+      - "8080:8080"
+
+volumes:
+  redpanda-data:

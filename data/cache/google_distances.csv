@@ -1,0 +1,161 @@
+﻿Adresse normalisée,Mode de trajet,Distance (km)
+"128 rue du port, 34000 frontignan",TRANSIT,26.21
+"68 rue du port, 34970 saint-clément-de-rivière",DRIVE,21.02
+"100 av. de la gare, 30900 nîmes",DRIVE,48.72
+"53 av. de la gare, 34970 lattes",WALK,1.63
+"74 rue des fleurs, 34970 lattes",WALK,0.38
+"av. de la mer, 34470 pérols",BICYCLE,6.34
+"28 rue du port, 34140 mèze",DRIVE,38.53
+"169 rue jean jaures, 34730 prades-le-lez",TRANSIT,19.68
+"44 rue jean jaures, 34730 prades-le-lez",DRIVE,20.3
+"31 av. grassion cibrand, 34130 mauguio",BICYCLE,8.16
+"136 rue des grottes, 34130 mauguio",DRIVE,8.23
+"38 rue du muscadet, 34090 montpellier",TRANSIT,12.14
+"181 av. de la gare, 34970 lattes",BICYCLE,1.54
+"24 rue de la cadoule, 34740 vendargues",DRIVE,13.46
+"110 rue de la république, 34000 montpellier",DRIVE,6.63
+"1037 val des sources, 34090 montpellier",BICYCLE,8.5
+"63 rue du marché, 34800 clermont-l'hérault",DRIVE,57.58
+"1 rue gerhardt, 34000 montpellier",TRANSIT,7.68
+"121 bis rue des carignans, 34790 grabels",DRIVE,16.19
+"70 av. jean jaurès, 30900 nîmes",DRIVE,49.61
+"38 plan des arbousiers, 34970 lattes",BICYCLE,7.43
+"50 boulevard de la mer, 34880 la grande-motte",DRIVE,14.52
+"av. de la mer, montpellier",BICYCLE,2.36
+"9 rue four des flammes, 34000 montpellier",DRIVE,6.78
+"45 rue de la république, 34000 montpellier",BICYCLE,5.64
+"57 av. de la liberté, 34070 montpellier",BICYCLE,6.47
+"40 rue du pradas, 34470 pérols",WALK,3.21
+"32 trav. de la brigantine, 34970 lattes",DRIVE,2.13
+"1932 ham. de rabejac, 34700 le puech",DRIVE,58.62
+"103 av. de la plage, 34450 vias",DRIVE,66.22
+"367 av. marcel pagnol, 34470 pérols",WALK,3.61
+"94 rue jean jaurès, 34740 vendargues",DRIVE,13.37
+"51 av. de la mer, 34470 pérols",DRIVE,6.35
+"87 rue du marché, 34400 lunel",DRIVE,22.02
+"187 chem. de la draye du marbre, 34170 castelnau-le-lez",BICYCLE,8.79
+"199-97 av. du pichagret, 34980 saint-gély-du-fesc",DRIVE,25.05
+455 route de mendes 34000 montpellier,BICYCLE,8.18
+"10 av. maréchal leclerc, 34280 la grande-motte",BICYCLE,13.59
+"pl. de la liberté, 34430 saint-jean-de-védas",DRIVE,14.98
+"118 imp. des vignes, 34470 pérols",WALK,3.35
+"200 rue du stade, 34830 clapiers",DRIVE,15.27
+"13 bd de la liberté, 34500 béziers",DRIVE,74.49
+"4 av. de la paix, 34690 fabrègues",TRANSIT,18.98
+"68 rue du n, 34920 le crès",BICYCLE,10.78
+"8 rue achille bege, 34090 montpellier",TRANSIT,7.83
+"18 rue des vignes, 34970 lattes",BICYCLE,2.36
+"47 av. de la gare, 34970 lattes",WALK,1.63
+"8 rue de la vieille, 34000 montpellier",BICYCLE,5.73
+"76 av. de la plage, 34410 sérignan",DRIVE,76.67
+"84 rue du port, 34470 pérols",BICYCLE,6.17
+"87 av. de la plage, 34450 vias",DRIVE,66.19
+"pl. jean jaurès, 34000 montpellier",BICYCLE,5.74
+"20 av. de la paix, 34690 fabrègues",DRIVE,18.51
+"139 av. des pins, 34150 gignac",DRIVE,41.74
+"112 chem. des pins, 34170 castelnau-le-lez",BICYCLE,8.5
+"129 av. de la liberté, 34070 montpellier",BICYCLE,7.49
+"3 rue de la république, 34770 gigean",DRIVE,33.71
+"21 av. du port, 34540 balaruc-les-bains",DRIVE,33.94
+"22 rue de la paix, 34130 mauguio",BICYCLE,9.08
+"140 all. des vignes, 34280 la grande-motte",DRIVE,19.47
+"21 all. martine carol, 34070 montpellier",TRANSIT,8.58
+"18 rue des arbousiers, 34230 bélarga",DRIVE,53.06
+"4 pl. des écoles, 34970 lattes",WALK,0.25
+"84 rue des écoles, 34980 saint-clément-de-rivière",BICYCLE,16.16
+"143 rue des sansouïres, 34970 lattes",BICYCLE,7.76
+"11 lot. mas de combes, 34230 popian",DRIVE,44.44
+"260 chem. du pompage, 34800 canet",DRIVE,49.05
+"21 rue de la liberté, 34700 soumont",DRIVE,68.15
+"12 rue william et catherine booth, 34070 montpellier",DRIVE,8.58
+"18 rue des agapanthes, 34470 pérols",TRANSIT,4.16
+"32 av. jean - louis etienne, 34740 vendargues",DRIVE,12.42
+"26 bd de la liberté, 34830 clapiers",BICYCLE,9.83
+"138 rue de la république, 30600 vauvert",DRIVE,39.94
+"3 rue tadorne, 34140 mèze",DRIVE,39.84
+"81 av. du général leclerc, 34470 pérols",TRANSIT,5.55
+"100 bd victor hugo, 34000 montpellier",BICYCLE,5.53
+"15 rue de la république, 34000 montpellier",BICYCLE,5.65
+"10 rue du marché aux raisins, 34750 villeneuve-lès-maguelone",BICYCLE,11.91
+"124 rue des écoles, 34540 balaruc-les-bains",TRANSIT,36.79
+"215 rue alphonse allais, 34070 montpellier",BICYCLE,6.7
+"85 av. de la paix, 34690 fabrègues",BICYCLE,19.92
+"pl. de la liberté, 34470 pérols",WALK,3.86
+"pl. du marché, 34250 palavas-les-flots",BICYCLE,11.24
+"111 rue du ctre, 34160 saint-drézéry",DRIVE,25.11
+"176 bd de la liberté, 34830 clapiers",DRIVE,14.96
+"44 av. de la paix, 34690 fabrègues",BICYCLE,19.93
+"151 bd victor hugo, 34000 montpellier",TRANSIT,5.64
+"17 rue du ctre, 34160 saint-drézéry",DRIVE,25.05
+"121 rue du marché, 34800 clermont-l'hérault",DRIVE,57.58
+"28 rue anatole france, 34120 pézenas",DRIVE,65.36
+"bd des sports, 34000 montpellier",BICYCLE,5.25
+"141 rue de la plage, 34130 mauguio",BICYCLE,7.81
+"328 all. de l'iliade, 34280 la grande-motte",DRIVE,16.35
+"162 av. de la paix, 34290 montblanc",DRIVE,61.7
+"79 rue des écoles, 34920 le crès",TRANSIT,27.49
+"189 pl. des écoles, 34970 lattes",WALK,0.28
+"rue des écoles, 34120 lézignan-la-cèbe",DRIVE,70.01
+"178 rue de la lucques, 34150 aniane",DRIVE,45.2
+"72 rue des pins, 34470 pérols",BICYCLE,3.9
+"36 bis rue paul verlaine, 34130 mauguio",DRIVE,10.3
+"13 bd des sports, 34000 montpellier",BICYCLE,5.31
+"90 av. de la liberté, 34070 montpellier",BICYCLE,7.36
+"121 bd des sports, 34000 montpellier",TRANSIT,6.52
+"6 rue des bougainvilliers, 34970 lattes",BICYCLE,3.08
+"19 rue de l'église, 34250 palavas-les-flots",BICYCLE,11.5
+"103 rue joseph guerre, 34070 montpellier",TRANSIT,9.81
+"7 rue alphonse daudet, 34470 pérols",BICYCLE,3.19
+"13 rue du marché, 34560 montbazin",DRIVE,37.37
+"57 av. des pins, 34130 valergues",BICYCLE,16.23
+"103 all. des pins, 34170 castelnau-le-lez",TRANSIT,13.58
+"20 rue de la petite calade, 34660 cournonterral",DRIVE,24.08
+"88 av. de la liberté, 34070 montpellier",BICYCLE,7.36
+"1 rue du stade, 34820 teyran",DRIVE,18.85
+"rue du n, 34920 le crès",BICYCLE,10.81
+"av. de la gare, 34540 balaruc-les-bains",DRIVE,33.43
+"rue rosset, 34000 montpellier",TRANSIT,6.15
+"50 rue du port, 34280 la grande-motte",DRIVE,18.82
+"485 anc. chem. du moulin, 34270 les matelles",DRIVE,32.9
+"97 rte de la mer, 34400 lunel",DRIVE,29.63
+"13 bis rue des anémones, 34000 montpellier",TRANSIT,5.21
+"222 rue georges bizet, 34130 mauguio",BICYCLE,9.0
+"75 rue des écoles, 34980 saint-clément-de-rivière",DRIVE,20.53
+"pl. de la liberté, 34470 pérols",BICYCLE,4.34
+"6 pl. de la république, 34700 lodève",DRIVE,64.62
+"40 rue jean jaurès, 34590 marsillargues",DRIVE,33.55
+"rue du ctre, 34160 saint-drézéry",DRIVE,25.02
+"77 bd des écoles, 34750 villeneuve-lès-maguelone",BICYCLE,11.77
+"140 rue du stade, 30920 codognan",DRIVE,35.9
+"2 rue palladio, 34970 lattes",BICYCLE,3.42
+"194 rue des amours d'antan, 34980 saint-gély-du-fesc",DRIVE,33.11
+"40 pl. des écoles, 34970 lattes",WALK,0.28
+"369 chem. du thym, 34170 castelnau-le-lez",TRANSIT,9.0
+"3 all. des cévennes, 34630 saint-thibéry",DRIVE,57.1
+"246 rue du boulidou, 34980 saint-clément-de-rivière",DRIVE,21.87
+"9 rue du lierre, 34850 pinet",DRIVE,48.08
+"36 rue de la condamine, 34970 lattes",DRIVE,2.56
+"49 pl. du marché, 34250 palavas-les-flots",BICYCLE,11.24
+"6 av. des pins, 34570 montarnaud",DRIVE,29.42
+"58 bd ernest renan, 34000 montpellier",BICYCLE,5.08
+"rue des vignes, 34070 montpellier",BICYCLE,6.61
+"229 rue albert camus, 34660 cournonterral",DRIVE,23.7
+"17 av. de la gare, 34770 gigean",DRIVE,33.67
+"61 rue jean jaurès, 34200 sète",DRIVE,40.06
+"5 rue des ecoles, 34830 clapiers",TRANSIT,17.81
+"179 chem. de la rocheuse, 34170 castelnau-le-lez",DRIVE,8.23
+"90 av. de la plage, 34450 vias",DRIVE,66.22
+"16 rue des roses, 34970 lattes",WALK,2.81
+"46 rue des écoles, 34470 pérols",BICYCLE,4.43
+"30 rue des vignes, 34970 lattes",WALK,2.27
+"1 rue de la paix, 34130 saint-aunès",TRANSIT,14.29
+"125 rue du port, 34280 la grande-motte",BICYCLE,17.13
+"99 rue du n, 34920 le crès",BICYCLE,10.77
+"100 av. de la gare, 34970 lattes",WALK,1.63
+"17 rue maguelone, 34250 palavas-les-flots",BICYCLE,11.23
+"56 imp. robespierre, 34130 mauguio",BICYCLE,9.74
+"68 bd des écoles, 34750 villeneuve-lès-maguelone",BICYCLE,11.77
+"27 av. du général leclerc, 34470 pérols",WALK,4.06
+"59 chem. des pins, 34170 castelnau-le-lez",DRIVE,8.87
+"2 rue du nord, 34920 le crès",DRIVE,12.97
+"5 av. de la liberté, 34070 montpellier",BICYCLE,5.71
