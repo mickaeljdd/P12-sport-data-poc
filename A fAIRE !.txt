@@ -1,1 +1,0 @@
-Ajout du streaming (Redpanda / Faire le pipeline pour la création d'activité dans le streaming)
