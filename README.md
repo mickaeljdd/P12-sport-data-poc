@@ -6,9 +6,7 @@ Ce projet a été réalisé dans le cadre d'un Proof of Concept (POC) autour de 
 
 L'objectif est de développer un pipeline ETL capable de traiter des données RH et sportives, d'enrichir ces données avec les distances domicile–entreprise grâce à Google Routes API, puis de calculer différents indicateurs liés à la mobilité durable et au bien-être des salariés.
 
-Lors du premier lancement, le pipeline génère un historique complet d'activités sportives simulées. Les exécutions suivantes fonctionnent en mode incrémental en ajoutant uniquement de nouvelles activités.
-
-Les données produites sont stockées dans une base SQLite, exportées au format CSV et exploitées dans un tableau de bord Power BI.
+Les données produites sont ensuite exploitées dans un tableau de bord Power BI.
 
 ---
 
@@ -20,12 +18,11 @@ Le projet permet de :
 - calculer les distances domicile–entreprise via Google Routes API ;
 - adapter le calcul d'itinéraire au moyen de déplacement déclaré ;
 - mettre en cache les distances afin d'éviter les appels API inutiles ;
-- générer un historique d'activités sportives simulées ;
-- générer de nouvelles activités lors des exécutions suivantes ;
+- générer un historique sportif simulé au premier lancement ;
+- ajouter 3 à 10 nouvelles activités à chaque lancement suivant ;
 - déterminer les salariés éligibles aux aides à la mobilité ;
 - calculer les jours de bien-être et les primes associées ;
-- générer et envoyer des notifications Slack pour les nouvelles activités ;
-- enregistrer les exécutions du pipeline (monitoring) ;
+- générer des messages Slack ;
 - exporter les résultats au format CSV ;
 - visualiser les résultats dans Power BI.
 
@@ -45,14 +42,11 @@ database/
 etl/
     Pipeline ETL
 
-monitoring/
-    Suivi des exécutions
-
 services/
     Services métier
 
 simulation/
-    Génération des activités
+    Génération des activités sportives
 
 tests/
     Tests unitaires
@@ -71,7 +65,6 @@ powerbi/
 - Google Routes API
 - Pytest
 - Power BI
-- Slack Incoming Webhooks
 
 ---
 
@@ -83,44 +76,32 @@ Installer les dépendances :
 pip install -r requirements.txt
 ```
 
-Créer un fichier `.env` à partir de `.env_sample.txt` puis renseigner les paramètres nécessaires.
+Créer un fichier `.env` à partir de `.env_sample.txt` puis renseigner la clé Google Routes API.
 
-Pour utiliser Google Routes API :
+Pour exécuter les calculs réels Google Routes, configurer :
 
 ```dotenv
 GOOGLE_MAPS_API_KEY=votre_cle
 DISTANCE_PROVIDER=google
 ```
 
-Pour utiliser le calcul simulé :
+Pour une exécution locale sans appel externe, conserver :
 
 ```dotenv
 DISTANCE_PROVIDER=mock
 ```
 
-Pour activer les notifications Slack :
+La clé API ne doit jamais être ajoutée au dépôt : le fichier `.env` est ignoré par Git.
 
-```dotenv
-SLACK_WEBHOOK_URL=https://hooks.slack.com/services/...
-```
+### Règles métier
 
-Le fichier `.env` ne doit jamais être versionné.
+Le moyen de déplacement déclaré dans les données RH est considéré comme le moyen majoritaire du salarié. La distance calculée doit être cohérente avec cette déclaration :
 
----
+- Marche : maximum 15 km ;
+- Vélo/Trottinette/Autres : maximum 25 km ;
+- autres modes : pas de prime sportive.
 
-## Règles métier
-
-Le moyen de déplacement déclaré dans les données RH est considéré comme le moyen principal du salarié.
-
-Les règles d'éligibilité sont les suivantes :
-
-- Marche : distance maximale de 15 km ;
-- Vélo, trottinette ou autre mobilité douce : distance maximale de 25 km ;
-- Autres moyens de transport : non éligibles.
-
-Une personne éligible reçoit une prime représentant **5 % de son salaire brut annuel**.
-
-Les journées de bien-être sont accordées à partir de **15 activités sportives sur une période glissante de 12 mois**, à raison de **5 jours**.
+Une personne éligible reçoit une prime de 5 % de son salaire brut annuel. Les journées bien-être sont accordées à partir de 15 activités sur 12 mois, à raison de 5 jours.
 
 ---
 
@@ -132,30 +113,6 @@ Lancer le pipeline :
 python -m etl.pipeline
 ```
 
-### Premier lancement
-
-Le pipeline :
-
-- importe les données RH ;
-- calcule les distances ;
-- génère l'historique complet des activités ;
-- calcule les indicateurs métier ;
-- alimente la base SQLite ;
-- exporte les fichiers CSV.
-
-Aucune notification Slack n'est envoyée lors de cette première exécution.
-
-### Exécutions suivantes
-
-Le pipeline :
-
-- génère uniquement de nouvelles activités ;
-- ajoute ces activités dans la base SQLite ;
-- recalcule les indicateurs métier ;
-- exporte les nouvelles données ;
-- envoie une notification Slack pour chaque nouvelle activité ;
-- enregistre les statistiques d'exécution dans le tableau de monitoring.
-
 Les résultats sont générés dans :
 
 ```
@@ -165,77 +122,142 @@ data/processed/
 - employees.csv
 - activities.csv
 - slack_messages.csv
-- pipeline_runs.csv
 
-Les données sont également enregistrées dans :
+Les données sont aussi chargées dans `database/sport_poc.db`.
 
-```
-database/sport_poc.db
-```
+Le premier lancement sur une base vide génère un historique de 12 mois. Les lancements suivants fonctionnent en mode incrémental : 3 à 10 nouvelles activités sont ajoutées, avec exactement un nouveau message Slack par activité. Les indicateurs de bien-être restent recalculés sur l'historique complet.
 
-Le cache `data/cache/google_distances.csv` mémorise les distances par adresse et par mode de trajet (`DRIVE`, `WALK`, `BICYCLE`, `TRANSIT`). Il peut être supprimé afin de forcer un recalcul complet.
+Le cache `data/cache/google_distances.csv` mémorise les distances par adresse et par mode de trajet (`DRIVE`, `WALK`, `BICYCLE`, `TRANSIT`). Il peut être supprimé pour forcer un recalcul complet.
 
-Le pipeline valide les données avant traitement et interrompt l'exécution lorsqu'une incohérence est détectée.
-
----
-
-## Monitoring
-
-Chaque exécution du pipeline est enregistrée avec notamment :
-
-- date de début ;
-- date de fin ;
-- durée d'exécution ;
-- statut (SUCCESS ou FAILED) ;
-- nombre d'activités générées ;
-- nombre de messages Slack générés ;
-- coût des primes mobilité ;
-- nombre de jours bien-être accordés ;
-- message d'erreur éventuel.
-
-Ces informations sont utilisées dans le tableau de bord Power BI.
+Le pipeline bloque l'exécution lorsqu'il détecte des données RH ou des activités incohérentes : identifiant salarié dupliqué, adresse ou salaire invalide, moyen de déplacement inconnu, date invalide, distance d'activité négative ou salarié inconnu.
 
 ---
 
 ## Tests
 
-Lancer les tests :
+Exécuter les tests :
 
 ```bash
 python -m pytest
 ```
 
-Le projet est couvert par **76 tests unitaires** validant :
-
-- le pipeline ETL ;
-- la validation des données ;
-- le repository SQLite ;
-- le calcul des distances ;
-- le cache Google ;
-- les règles d'éligibilité ;
-- la génération historique et incrémentale des activités ;
-- les notifications Slack ;
-- le monitoring des exécutions.
+Le projet est couvert par une suite de tests unitaires permettant de valider les principaux composants (ETL, services, cache, API Google, génération des activités, etc.).
 
 ---
 
 ## Tableau de bord
 
-Le tableau de bord Power BI (`powerbi/P12.pbix`) permet notamment de visualiser :
+Le fichier Power BI (`powerbi/P12.pbix`) permet de visualiser notamment :
 
-- les salariés et les sportifs ;
-- les activités sportives générées ;
-- les primes mobilité ;
+- le nombre de salariés et de sportifs ;
+- les activités générées ;
+- les salariés éligibles à la mobilité ;
+- les primes calculées ;
 - les jours de bien-être ;
 - la répartition des sports ;
-- l'évolution des activités ;
-- les notifications Slack ;
-- le suivi des exécutions du pipeline (monitoring).
+- l'évolution mensuelle des activités.
 
 ---
 
+## Test d'envoi Slack
+
+Le pipeline génère les messages Slack mais ne les publie pas
+automatiquement afin d'éviter l'envoi de l'historique simulé.
+
+Créer un Incoming Webhook Slack puis renseigner :
+
+```dotenv
+SLACK_WEBHOOK_URL=https://hooks.slack.com/services/...
+```
+---
 ## Auteur
 
-Mickael DARMON
-
 Projet réalisé dans le cadre du parcours de formation Data & IA.
+
+---
+
+## Streaming avec Redpanda
+
+Le pipeline peut publier les nouvelles données sous forme d'événements dans Redpanda. Le chargement historique initial reste traité en batch afin d'éviter l'envoi de milliers de notifications. À partir du deuxième lancement, chaque nouvelle activité et chaque message Slack sont publiés individuellement.
+
+### Architecture
+
+```text
+Pipeline incrémental
+        |
+        +--> sport.activities  --> consommateurs métier
+        |
+        +--> sport.slack       --> consommateur Slack
+        |
+        +--> sport.monitoring  --> supervision / Redpanda Console
+```
+
+SQLite et les exports CSV restent alimentés par le pipeline afin de conserver la compatibilité avec Power BI. Redpanda ajoute une diffusion événementielle découplée, observable dans Redpanda Console.
+
+### Démarrer Redpanda
+
+Docker Desktop et Docker Compose doivent être installés.
+
+```bash
+docker compose -f docker-compose.redpanda.yml up -d
+```
+
+Redpanda Console est ensuite accessible sur `http://localhost:8080`.
+
+### Activer le streaming
+
+Dans le fichier `.env` :
+
+```dotenv
+STREAMING_ENABLED=true
+REDPANDA_BOOTSTRAP_SERVERS=localhost:19092
+REDPANDA_CLIENT_ID=sport-data-poc
+REDPANDA_ACTIVITIES_TOPIC=sport.activities
+REDPANDA_SLACK_TOPIC=sport.slack
+REDPANDA_MONITORING_TOPIC=sport.monitoring
+```
+
+Installer les dépendances puis lancer le pipeline :
+
+```bash
+pip install -r requirements.txt
+python -m etl.pipeline
+```
+
+Lors du premier lancement, seul l'événement de monitoring est publié. Lors des lancements incrémentaux, les nouvelles activités et leurs messages Slack sont également diffusés.
+
+### Consommer les notifications Slack
+
+Dans un terminal séparé :
+
+```bash
+python -m scripts.consume_slack_events
+```
+
+Le consommateur utilise `SLACK_WEBHOOK_URL` et valide l'offset seulement après un envoi réussi. Un événement non traité reste donc disponible pour une nouvelle tentative.
+
+### Observer les événements
+
+Les topics suivants sont visibles dans Redpanda Console :
+
+- `sport.activities` : nouvelles activités sportives ;
+- `sport.slack` : messages Slack prêts à envoyer ;
+- `sport.monitoring` : résultats des exécutions du pipeline.
+
+Un consommateur de démonstration permet également d'afficher les événements de monitoring :
+
+```bash
+python -m scripts.consume_monitoring_events
+```
+
+### Arrêter Redpanda
+
+```bash
+docker compose -f docker-compose.redpanda.yml down
+```
+
+Pour supprimer également les données persistées dans Redpanda :
+
+```bash
+docker compose -f docker-compose.redpanda.yml down -v
+```

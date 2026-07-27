@@ -29,21 +29,23 @@ from services.slack_message_service import SlackMessageService
 from services.wellbeing_service import WellbeingService
 from simulation.activity_generator import ActivityGenerator
 from simulation.live_activity_generator import LiveActivityGenerator
-from services.slack_webhook_service import (
-    SlackWebhookService,
-)
+from streaming.config import StreamingSettings
+from streaming.producer import RedpandaProducer
+
+
 class Pipeline:
     def __init__(self) -> None:
         engine = create_database_engine()
 
         self.repository = DataRepository(engine)
-        self.slack_webhook_service = SlackWebhookService()
         self.distance_service = DistanceService()
         self.wellbeing_service = WellbeingService()
         self.eligibility_service = EligibilityService()
         self.slack_message_service = SlackMessageService()
         self.activity_generator = ActivityGenerator()
         self.live_activity_generator = LiveActivityGenerator()
+        self.streaming_settings = StreamingSettings.from_env()
+
         # Remplace le service par celui configuré par la factory.
         self.distance_service = create_distance_service()
 
@@ -71,160 +73,105 @@ class Pipeline:
             employees = self.compute_distance(employees)
             employees = self.compute_eligibility(employees)
 
-            incremental_mode = (
-                self.repository.activities_exist()
-            )
+            is_incremental = self.repository.activities_exist()
 
-            if incremental_mode:
-                new_activities = (
-                    self.generate_incremental_activities(
-                        employees
-                    )
-                )
-
-                new_activities = validate_activities(
-                    new_activities,
-                    employees,
-                )
-
-                existing_activities = (
-                    self.repository.read_table(
-                        self.repository.ACTIVITIES_TABLE
-                    )
-                )
-
-                all_activities = pd.concat(
-                    [
-                        existing_activities,
-                        new_activities,
-                    ],
-                    ignore_index=True,
-                )
-
-                logger.info(
-                    "Mode incrémental : %s nouvelle(s) "
-                    "activité(s), %s activité(s) au total",
-                    len(new_activities),
-                    len(all_activities),
-                )
-
-            else:
-                new_activities = self.generate_activities(
+            if is_incremental:
+                new_activities = self.generate_incremental_activities(
                     employees
                 )
-
                 new_activities = validate_activities(
                     new_activities,
                     employees,
                 )
-
-                all_activities = new_activities.copy()
-
-                logger.info(
-                    "Mode initial : génération de "
-                    "l'historique complet"
+                self.repository.append_activities(new_activities)
+                all_activities = self.repository.read_table(
+                    self.repository.ACTIVITIES_TABLE
                 )
+            else:
+                new_activities = self.generate_activities(employees)
+                new_activities = validate_activities(
+                    new_activities,
+                    employees,
+                )
+                self.repository.save_activities(new_activities)
+                all_activities = new_activities
 
-            # Le bien-être est recalculé sur tout l'historique.
             employees = self.compute_wellbeing(
                 employees,
                 all_activities,
             )
 
-            # Un message Slack par nouvelle activité seulement.
-            slack_messages = self.generate_slack_messages(
+            new_slack_messages = self.generate_slack_messages(
                 employees,
                 new_activities,
             )
 
-            if incremental_mode:
-                self.slack_webhook_service.send_messages(
-                    slack_messages
+            self.repository.save_employees(employees)
+
+            if is_incremental:
+                self.repository.append_slack_messages(
+                    new_slack_messages
                 )
-            else :
-                logger.info(
-                    "Mode initial : les messages Slack "
-                    "ne sont pas envoyés."
+            else:
+                self.repository.save_slack_messages(
+                    new_slack_messages
                 )
 
-            self.persist_data(
-                employees=employees,
-                activities=new_activities,
-                slack_messages=slack_messages,
-                incremental_mode=incremental_mode,
-            )
-
-            # Les exports Power BI contiennent l'historique complet.
-            all_activities = self.repository.read_table(
-                self.repository.ACTIVITIES_TABLE
-            )
-            
             all_slack_messages = self.repository.read_table(
                 self.repository.SLACK_MESSAGES_TABLE
             )
 
             self.export(employees)
             self.export_activities(all_activities)
-            self.export_slack_messages(
-                all_slack_messages
-            )
+            self.export_slack_messages(all_slack_messages)
 
             elapsed = time.perf_counter() - start_time
 
             pipeline_run.finished_at = datetime.now()
-            pipeline_run.duration_seconds = round(
-                elapsed,
-                3,
-            )
+            pipeline_run.duration_seconds = round(elapsed, 3)
             pipeline_run.status = "SUCCESS"
             pipeline_run.employee_count = len(employees)
-
-            # Ces compteurs représentent les données créées
-            # pendant cette exécution.
-            pipeline_run.activity_count = len(
-                new_activities
-            )
-            pipeline_run.slack_message_count = len(
-                slack_messages
-            )
-
+            pipeline_run.activity_count = len(new_activities)
+            pipeline_run.slack_message_count = len(new_slack_messages)
             pipeline_run.bonus_total = float(
                 employees["bonus"].sum()
             )
-
             pipeline_run.wellbeing_days = int(
-                employees[
-                    "Jours bien-être accordés"
-                ].sum()
+                employees["Jours bien-être accordés"].sum()
             )
 
             self.repository.save_pipeline_run(
                 pipeline_run.to_dataframe()
             )
-
             self.export_pipeline_runs()
 
+            self.publish_streaming_events(
+                activities=new_activities,
+                slack_messages=new_slack_messages,
+                pipeline_run=pipeline_run.to_dataframe(),
+                publish_business_events=is_incremental,
+            )
+
             logger.info(
-                "Pipeline terminé avec succès en %.2f "
-                "secondes | run_id=%s",
+                "Pipeline terminé avec succès en %.2f secondes "
+                "| run_id=%s | mode=%s | nouvelles_activités=%s",
                 elapsed,
                 pipeline_run.run_id,
+                "incrémental" if is_incremental else "historique",
+                len(new_activities),
             )
 
             return (
                 employees,
                 all_activities,
-                slack_messages,
+                all_slack_messages,
             )
 
         except Exception as error:
             elapsed = time.perf_counter() - start_time
 
             pipeline_run.finished_at = datetime.now()
-            pipeline_run.duration_seconds = round(
-                elapsed,
-                3,
-            )
+            pipeline_run.duration_seconds = round(elapsed, 3)
             pipeline_run.status = "FAILED"
             pipeline_run.error_message = (
                 f"{type(error).__name__}: {error}"
@@ -234,21 +181,62 @@ class Pipeline:
                 self.repository.save_pipeline_run(
                     pipeline_run.to_dataframe()
                 )
-
                 self.export_pipeline_runs()
-
             except Exception:
                 logger.exception(
-                    "Impossible d'enregistrer ou "
-                    "d'exporter l'échec du pipeline"
+                    "Impossible d'enregistrer ou d'exporter "
+                    "l'échec du pipeline"
                 )
 
             logger.exception(
                 "Échec du pipeline | run_id=%s",
                 pipeline_run.run_id,
             )
-
             raise
+
+    def publish_streaming_events(
+        self,
+        activities: pd.DataFrame,
+        slack_messages: pd.DataFrame,
+        pipeline_run: pd.DataFrame,
+        publish_business_events: bool,
+    ) -> None:
+        """Publie les événements du run lorsque Redpanda est activé.
+
+        L'historique initial n'est pas diffusé vers Slack afin d'éviter
+        plusieurs milliers de notifications. Les exécutions incrémentales
+        publient une activité et un message Slack par événement.
+        """
+        if not self.streaming_settings.enabled:
+            return
+
+        with RedpandaProducer(self.streaming_settings) as producer:
+            if publish_business_events:
+                producer.publish_dataframe(
+                    topic=self.streaming_settings.activities_topic,
+                    dataframe=activities,
+                    key_column="ID",
+                    event_type="activity.created",
+                )
+                producer.publish_dataframe(
+                    topic=self.streaming_settings.slack_topic,
+                    dataframe=slack_messages,
+                    key_column="ID",
+                    event_type="slack.message.created",
+                )
+
+            producer.publish_dataframe(
+                topic=self.streaming_settings.monitoring_topic,
+                dataframe=pipeline_run,
+                key_column="run_id",
+                event_type="pipeline.run.completed",
+            )
+
+        logger.info(
+            "Événements Redpanda publiés | activités=%s | slack=%s",
+            len(activities) if publish_business_events else 0,
+            len(slack_messages) if publish_business_events else 0,
+        )
 
     def extract_hr(self) -> pd.DataFrame:
         df = load_hr()
@@ -396,34 +384,33 @@ class Pipeline:
         return activities
 
     def generate_incremental_activities(
-    self,
-    employees: pd.DataFrame,
-) -> pd.DataFrame:
-        last_activity_id = (
-            self.repository.get_last_activity_id()
-        )
-
-        activities = (
-            self.live_activity_generator.generate(
-                employees=employees,
-                starting_id=last_activity_id + 1,
+        self,
+        employees: pd.DataFrame,
+        minimum_count: int = 3,
+        maximum_count: int = 10,
+    ) -> pd.DataFrame:
+        if minimum_count < 1 or maximum_count < minimum_count:
+            raise ValueError(
+                "La plage du nombre d'activités incrémentales est invalide."
             )
+
+        activity_count = self.live_activity_generator.random.randint(
+            minimum_count,
+            maximum_count,
+        )
+        starting_id = self.repository.get_last_activity_id() + 1
+
+        activities = self.live_activity_generator.generate(
+            employees=employees,
+            starting_id=starting_id,
+            activity_count=activity_count,
         )
 
         logger.info(
-            "Nouvelles activités générées : %s "
-            "| IDs de %s à %s",
+            "Activités incrémentales générées : %s (IDs %s à %s)",
             len(activities),
-            (
-                activities["ID"].min()
-                if not activities.empty
-                else None
-            ),
-            (
-                activities["ID"].max()
-                if not activities.empty
-                else None
-            ),
+            starting_id,
+            starting_id + len(activities) - 1,
         )
 
         return activities
@@ -520,58 +507,4 @@ class Pipeline:
         logger.info(
             "Export du monitoring terminé : %s exécution(s)",
             len(pipeline_runs),
-        )
-
-    def persist_data(
-        self,
-        employees: pd.DataFrame,
-        activities: pd.DataFrame,
-        slack_messages: pd.DataFrame,
-        incremental_mode: bool = False,
-    ) -> None:
-        employee_count = (
-            self.repository.save_employees(
-                employees
-            )
-        )
-
-        if incremental_mode:
-            activity_count = (
-                self.repository.append_activities(
-                    activities
-                )
-            )
-
-            message_count = (
-                self.repository.append_slack_messages(
-                    slack_messages
-                )
-            )
-
-            persistence_mode = "append"
-
-        else:
-            activity_count = (
-                self.repository.save_activities(
-                    activities
-                )
-            )
-
-            message_count = (
-                self.repository.save_slack_messages(
-                    slack_messages
-                )
-            )
-
-            persistence_mode = "replace"
-
-        logger.info(
-            "Base mise à jour en mode %s : "
-            "%s salariés, "
-            "%s activités, "
-            "%s messages Slack",
-            persistence_mode,
-            employee_count,
-            activity_count,
-            message_count,
         )

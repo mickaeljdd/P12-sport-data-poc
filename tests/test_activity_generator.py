@@ -239,3 +239,20 @@ def test_employees_without_sport_produce_empty_dataframe():
     )
 
     assert result.empty
+
+def test_live_generator_creates_requested_incremental_ids():
+    from simulation.live_activity_generator import LiveActivityGenerator
+
+    result = LiveActivityGenerator(seed=42).generate(
+        build_employees(),
+        starting_id=101,
+        activity_count=5,
+        activity_date=START_DATE,
+    )
+
+    assert len(result) == 5
+    assert result["ID"].tolist() == [101, 102, 103, 104, 105]
+    assert set(result["ID salarié"]).issubset({1, 3})
+    assert (
+        result["Date de début de l'activité"].dt.date == START_DATE
+    ).all()

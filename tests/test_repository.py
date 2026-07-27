@@ -229,3 +229,18 @@ repository: DataRepository,
     )
 
     assert len(result) == 2
+
+def test_activities_can_be_appended(repository: DataRepository):
+    initial = build_activities()
+    repository.save_activities(initial)
+
+    appended = initial.iloc[[0]].copy()
+    appended["ID"] = 3
+
+    inserted_count = repository.append_activities(appended)
+    result = repository.read_table("activities")
+
+    assert inserted_count == 1
+    assert result["ID"].tolist() == [1, 2, 3]
+    assert repository.get_last_activity_id() == 3
+    assert repository.activities_exist() is True
