@@ -76,11 +76,8 @@ Installer les dépendances :
 pip install -r requirements.txt
 ```
 
-<<<<<<< HEAD
-Créer un fichier `.env` à partir de `.env_sample.txt` puis renseigner la clé Google Routes API.
-=======
 Créer un fichier `.env` à partir de `.env_sample` puis renseigner les paramètres nécessaires.
->>>>>>> 7fa90747e5dabb70273a8c18eddf2aa67f29113f
+
 
 Pour exécuter les calculs réels Google Routes, configurer :
 
