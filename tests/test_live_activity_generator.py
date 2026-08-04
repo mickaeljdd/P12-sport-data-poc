@@ -32,24 +32,22 @@ def test_generate_returns_dataframe():
     activities = generator.generate(
         employees=make_employees(),
         starting_id=1,
+        activity_count=5
     )
 
     assert isinstance(activities, pd.DataFrame)
 
 
-def test_generate_activity_count_is_within_config():
+def test_generate_returns_requested_activity_count() -> None:
     generator = LiveActivityGenerator(seed=42)
 
     activities = generator.generate(
         employees=make_employees(),
         starting_id=1,
+        activity_count=5,
     )
 
-    assert (
-        MIN_INCREMENTAL_ACTIVITIES
-        <= len(activities)
-        <= MAX_INCREMENTAL_ACTIVITIES
-    )
+    assert len(activities) == 5
 
 
 def test_generate_ids_are_sequential():
@@ -58,6 +56,7 @@ def test_generate_ids_are_sequential():
     activities = generator.generate(
         employees=make_employees(),
         starting_id=10,
+        activity_count=5,
     )
 
     expected_ids = list(
@@ -76,6 +75,7 @@ def test_generate_only_sporting_employees():
     activities = generator.generate(
         employees=make_employees(),
         starting_id=1,
+        activity_count=5
     )
 
     assert set(activities["ID salarié"]).issubset({1, 2})
