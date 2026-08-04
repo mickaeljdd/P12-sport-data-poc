@@ -194,7 +194,7 @@ SQLite et les exports CSV restent alimentés par le pipeline afin de conserver l
 Docker Desktop et Docker Compose doivent être installés.
 
 ```bash
-docker compose -f docker-compose.redpanda.yml up -d
+docker compose -f docker-compose.yml up -d
 ```
 
 Redpanda Console est ensuite accessible sur `http://localhost:8080`.
