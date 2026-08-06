@@ -248,14 +248,33 @@ python -m scripts.consume_monitoring_events
 ### Arrêter Redpanda
 
 ```bash
-docker compose -f docker-compose.redpanda.yml down
+docker compose -f docker-compose.yml down
 ```
 
 Pour supprimer également les données persistées dans Redpanda :
 
 ```bash
-docker compose -f docker-compose.redpanda.yml down -v
+docker compose -f docker-compose.yml down -v
 ```
+
+## Automatisation et supervision du pipeline
+
+Le pipeline enregistre déjà le résultat de chaque exécution dans le topic sport.monitoring, mais aucune planification n’est fournie par défaut dans ce POC. Pour automatiser une exécution quotidienne sous Linux, il est possible d’ajouter une tâche cron, par exemple à 06 h 00 :
+
+0 6 * * * cd /chemin/vers/P12 && /usr/bin/python3 -m etl.pipeline >> logs/pipeline.log 2>&1
+
+Le répertoire logs/ doit exister avant la première exécution planifiée. En environnement Windows, la même commande peut être déclenchée avec le Planificateur de tâches.
+
+Pour recevoir une alerte Slack lorsqu’une exécution échoue, une commande planifiée peut encapsuler le pipeline et appeler le webhook configuré dans SLACK_WEBHOOK_URL :
+
+cd /chemin/vers/P12
+python -m etl.pipeline || curl -X POST \
+  -H 'Content-type: application/json' \
+  --data '{"text":"Échec du pipeline Sport Data POC. Consulter les logs d’exécution."}' \
+  "$SLACK_WEBHOOK_URL"
+
+Cette alerte d’échec et la planification sont des exemples de déploiement : elles ne sont pas installées automatiquement par le dépôt. Dans le périmètre actuel du POC, la publication d’un événement d’échec dans sport.monitoring dépend également du traitement d’erreur du pipeline ; aucun orchestrateur, mécanisme de relance automatique ou service d’astreinte n’est fourni. Ces limites doivent être présentées explicitement pendant la soutenance.
+
 ---
 ## Auteur
 
